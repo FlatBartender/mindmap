@@ -1,0 +1,124 @@
+@startuml
+
+class MindMap {
+	default permission: PermissionType
+	info: Info
+}
+
+MindMap --> "Many" Node : nodes
+MindMap --> "Many" Permission : permissions
+
+class Permission {
+	user: User
+}
+
+Permission --* PermissionType : type
+
+enum PermissionType {
+	Read
+	Write
+	Moderate
+	Admin
+}
+
+class Node {
+	text: String
+	color: Color
+	info: Info
+}
+
+Node <-- Node : parent
+
+class Comment {
+	message: String
+	info: Info
+}
+
+Node --> "Many" Comment : comments
+
+class Edge {
+	brief: String
+	description: String
+	info: Info
+}
+
+note left of Edge
+	An "edge" is an extra edge. 
+	There is already a tree structure,
+	but the users want another edge to
+	act as some kind of "pointer".
+end note
+
+Edge --> Node : from
+Edge --> Node : to
+
+enum EdgeType {
+	Dotted
+	Full
+}
+
+Edge --* EdgeType : type
+
+class User {
+	username: String
+	password: String (bcrypt)
+}
+
+User <-- MindMap : info.author
+
+class Info<E: Event> {
+	owner: User
+	created: Time
+	history: History<E>
+}
+
+class History<E: Event> {
+	user: User
+	time: Time
+	event: E
+}
+
+abstract class Event
+
+Info --> "Many" History : history
+History --* Event : event
+
+note right of Event
+	Each structure has it's own "event" class,
+	defining what can happen in this struct.
+	For example, a Node can have it's message
+	changed, the color changed, a comment added,
+	etc., whereas an Edge can have it's brief
+	changed, line style changed, and description
+	changed.
+end note
+
+package Legend <<Rectangle>> {
+	class A
+	class B
+	A --* B : Direct inclusion in A
+
+	class C
+	class D
+	C --> "Many" D : C holds a reference to D
+
+	together {
+		note as legend_note_1
+			An edge between two classes contains
+			the field on which it will be "kept"
+			in the class on the symbol-less end
+			of the edge. For example, A has a B
+			field, but B doesn't have an A field.
+		end note
+
+		note bottom of legend_note_1 
+			A keyword at an end of an edge means
+			that the class at the other end has
+			"keyword" the class at the keyword end.
+			Example is C --> D, C <b>holds <i>many</i> references
+			to D</b>.
+		end note
+	}
+}
+
+@enduml
