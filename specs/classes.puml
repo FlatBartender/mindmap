@@ -27,7 +27,7 @@ class Node {
 	info: Info
 }
 
-Node <-- Node : parent
+Node "0 or 1" <-- Node : parent
 
 class Comment {
 	message: String
@@ -111,13 +111,15 @@ package Legend <<Rectangle>> {
 			field, but B doesn't have an A field.
 		end note
 
-		note bottom of legend_note_1 
+		note as legend_note_2
 			A keyword at an end of an edge means
 			that the class at the other end has
 			"keyword" the class at the keyword end.
-			Example is C --> D, C <b>holds <i>many</i> references
-			to D</b>.
+			Example is C --> D,
+			C <b>holds <i>many</i> references to D</b>.
 		end note
+
+		legend_note_1 -down-> legend_note_2
 	}
 }
 
