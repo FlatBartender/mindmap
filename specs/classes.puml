@@ -1,17 +1,20 @@
 @startuml
 
 class MindMap {
-	default permission: PermissionType
-	info: Info
+	id: u64
+	name: String
 }
 
 MindMap --> "Many" Node : nodes
 MindMap --> "Many" Permission : permissions
+MindMap --* PermissionType : default_permission
+MindMap --> "Many" History : history
 
 class Permission {
-	user: User
+	id: u64
 }
 
+Permission --> User : user
 Permission --* PermissionType : type
 
 enum PermissionType {
@@ -22,24 +25,25 @@ enum PermissionType {
 }
 
 class Node {
+	id: u64
 	text: String
 	color: Color
-	info: Info
+	tags: Vec<String>
 }
 
 Node "0 or 1" <-- Node : parent
 
 class Comment {
+	id: u64
 	message: String
-	info: Info
 }
 
-Node --> "Many" Comment : comments
+Node <-- Comment : node
 
 class Edge {
+	id: u64
 	brief: String
 	description: String
-	info: Info
 }
 
 note left of Edge
@@ -52,46 +56,77 @@ end note
 Edge --> Node : from
 Edge --> Node : to
 
-enum EdgeType {
+enum EdgeStyle {
 	Dotted
 	Full
+	Dashes
 }
 
-Edge --* EdgeType : type
+Edge --* EdgeStyle : style
 
 class User {
+	id: u64
 	username: String
 	password: String (bcrypt)
 }
 
-User <-- MindMap : info.author
-
-class Info<E: Event> {
-	owner: User
-	created: Time
-	history: History<E>
-}
-
-class History<E: Event> {
-	user: User
+class History {
+	id: u64
 	time: Time
-	event: E
 }
 
-abstract class Event
+History --> User : user
 
-Info --> "Many" History : history
-History --* Event : event
+enum MindMapEvent {
+	MindMapCreated
+	---
+	NodeAdded(Node)
+	NodeDeleted(Node)
+	NodeModified(Node, NodeEvent)
+	---
+	EdgeAdded(Edge)
+	EdgeDeleted(Edge)
+	EdgeModified(Edge, EdgeEvent)
+	---
+	PermissionAdded(Permission)
+	PermissionDeleted(Permission)
+	PermissionModified(Permission, PermissionEvent)
+	---
+	CommentAdded(Comment)
+	CommentDeleted(Comment)
+	CommentModified(Comment, CommentEvent)
+}
 
-note right of Event
-	Each structure has it's own "event" class,
-	defining what can happen in this struct.
-	For example, a Node can have it's message
-	changed, the color changed, a comment added,
-	etc., whereas an Edge can have it's brief
-	changed, line style changed, and description
-	changed.
-end note
+History --* MindMapEvent : event
+
+enum NodeEvent {
+	Moved(Node) // Parent changed to Node
+	Text(String)
+	Color(Color)
+}
+
+MindMapEvent ... NodeEvent
+
+enum EdgeEvent {
+	Brief(String)
+	Description(String)
+	Color(Color)
+	Style(EdgeStyle)
+}
+
+MindMapEvent ... EdgeEvent
+
+enum PermissionEvent {
+	Type(PermissionType)
+}
+
+MindMapEvent ... PermissionEvent
+
+enum CommentEvent {
+	Message(String)
+}
+
+MindMapEvent ... CommentEvent
 
 package Legend <<Rectangle>> {
 	class A
@@ -101,6 +136,10 @@ package Legend <<Rectangle>> {
 	class C
 	class D
 	C --> "Many" D : C holds a reference to D
+
+	class E
+	class F
+	E ... F : See also F
 
 	together {
 		note as legend_note_1
