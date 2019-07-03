@@ -5,10 +5,10 @@ class MindMap {
 	name: String
 }
 
-MindMap --> "Many" Node : nodes
-MindMap --> "Many" Permission : permissions
+MindMap <-- Node : map
+MindMap <-- Permission : map
 MindMap --* PermissionType : default_permission
-MindMap --> "Many" History : history
+MindMap <-- History : map
 
 class Permission {
 	id: u64
@@ -39,6 +39,7 @@ class Comment {
 	message: String
 }
 
+MindMap <-- Comment : map
 Node <-- Comment : node
 
 class Edge {
