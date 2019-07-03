@@ -60,7 +60,7 @@ Edge --> Node : to
 enum EdgeStyle {
 	Dotted
 	Full
-	Dashes
+	Dashed
 }
 
 Edge --* EdgeStyle : style
