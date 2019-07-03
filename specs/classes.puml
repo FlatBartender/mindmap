@@ -22,6 +22,7 @@ enum PermissionType {
 	Write
 	Moderate
 	Admin
+	Owner
 }
 
 class Node {
@@ -77,8 +78,9 @@ class History {
 
 History --> User : user
 
-enum MindMapEvent {
+enum Event {
 	MindMapCreated
+	MindMapMofified(MindMapEvent)
 	---
 	NodeAdded(Node)
 	NodeDeleted(Node)
@@ -97,7 +99,14 @@ enum MindMapEvent {
 	CommentModified(Comment, CommentEvent)
 }
 
-History --* MindMapEvent : event
+History --* Event : event
+
+enum MindMapEvent {
+	Name(String)
+	DefaultPermission(Permission)
+}
+
+Event ... MindMapEvent
 
 enum NodeEvent {
 	Moved(Node) // Parent changed to Node
@@ -105,7 +114,7 @@ enum NodeEvent {
 	Color(Color)
 }
 
-MindMapEvent ... NodeEvent
+Event ... NodeEvent
 
 enum EdgeEvent {
 	Brief(String)
@@ -114,19 +123,19 @@ enum EdgeEvent {
 	Style(EdgeStyle)
 }
 
-MindMapEvent ... EdgeEvent
+Event ... EdgeEvent
 
 enum PermissionEvent {
 	Type(PermissionType)
 }
 
-MindMapEvent ... PermissionEvent
+Event ... PermissionEvent
 
 enum CommentEvent {
 	Message(String)
 }
 
-MindMapEvent ... CommentEvent
+Event ... CommentEvent
 
 package Legend <<Rectangle>> {
 	class A
